@@ -1,0 +1,135 @@
+@model TicketingLite.Models.Ticket
+
+@{
+    ViewData["Title"] = "Ticket";
+    bool isStaff = ViewBag.IsStaff ?? false;
+    string? assignedEmail = ViewBag.AssignedAgentEmail as string;
+
+    string StatusBadge() => Model.Status switch
+    {
+        TicketingLite.Models.TicketStatus.Open => "bg-warning text-dark",
+        TicketingLite.Models.TicketStatus.InProgress => "bg-primary",
+        TicketingLite.Models.TicketStatus.Resolved => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    string PriorityBadge() => Model.Priority switch
+    {
+        TicketingLite.Models.TicketPriority.High => "bg-danger",
+        TicketingLite.Models.TicketPriority.Medium => "bg-secondary",
+        TicketingLite.Models.TicketPriority.Low => "bg-light text-dark",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h2 class="mb-1">@Model.Title</h2>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="badge @StatusBadge()">@Model.Status</span>
+            <span class="badge @PriorityBadge()">@Model.Priority</span>
+            <span class="text-muted small">Created @Model.CreatedAt.ToLocalTime()</span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        @if (isStaff)
+        {
+            <a class="btn btn-primary" asp-action="Manage" asp-route-id="@Model.Id">Manage</a>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="fw-semibold mb-2">Description</div>
+                <div class="text-muted" style="white-space: pre-wrap;">@Model.Description</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="fw-semibold mb-2">Comments</div>
+
+                <form id="commentForm" class="mb-3">
+                    <textarea id="commentBody" class="form-control" rows="3" placeholder="Write a comment..."></textarea>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+                    </div>
+                </form>
+
+                <div id="commentError" class="text-danger small mb-2" style="display:none;"></div>
+
+                <div id="commentsList" class="d-flex flex-column gap-2">
+                    @foreach (var c in Model.Comments.OrderByDescending(x => x.CreatedAt))
+                    {
+                        <div class="border rounded-3 p-3">
+                            <div class="small text-muted">@c.CreatedAt.ToLocalTime()</div>
+                            <div style="white-space: pre-wrap;">@c.Body</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="fw-semibold mb-2">Details</div>
+
+                <div class="mb-2">
+                    <div class="text-muted small">Assigned agent</div>
+                    <div>@(string.IsNullOrWhiteSpace(assignedEmail) ? "Unassigned" : assignedEmail)</div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="text-muted small">Ticket ID</div>
+                    <div>#@Model.Id</div>
+                </div>
+
+                <div>
+                    <div class="text-muted small">Created</div>
+                    <div>@Model.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById("commentForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = document.getElementById("commentError");
+  err.style.display = "none";
+  err.textContent = "";
+
+  const bodyEl = document.getElementById("commentBody");
+  const body = bodyEl.value.trim();
+  if (!body) return;
+
+  const res = await fetch(`/api/tickets/@Model.Id/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body })
+  });
+
+  if (!res.ok) {
+    err.textContent = "Could not add comment.";
+    err.style.display = "block";
+    return;
+  }
+
+  const data = await res.json();
+  const wrapper = document.createElement("div");
+  wrapper.className = "border rounded-3 p-3";
+  wrapper.innerHTML = `<div class="small text-muted">${new Date(data.createdAt).toLocaleString()}</div>
+                       <div style="white-space: pre-wrap;">${data.body}</div>`;
+  document.getElementById("commentsList").prepend(wrapper);
+
+  bodyEl.value = "";
+});
+</script>

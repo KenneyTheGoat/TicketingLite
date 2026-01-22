@@ -1,0 +1,26 @@
+## Build outputs
+bin/
+obj/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+## OS junk
+.DS_Store
+Thumbs.db
+
+## Secrets / config
+appsettings.*.json
+!appsettings.json
+.env
+
+## Databases
+*.db
+*.sqlite
+*.sqlite3
+
+## Publish output
+publish/

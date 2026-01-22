@@ -1,0 +1,46 @@
+@model TicketingLite.ViewModels.TicketCreateVm
+@using TicketingLite.Models
+
+@{
+    ViewData["Title"] = "New Ticket";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">New Ticket</h2>
+        <div class="text-muted small">Describe the issue and we’ll take it from there.</div>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input class="form-control" asp-for="Title" />
+                <div class="text-danger small"><span asp-validation-for="Title"></span></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Priority</label>
+                <select class="form-select" asp-for="Priority" asp-items="Html.GetEnumSelectList<TicketPriority>()"></select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" asp-for="Description" rows="6"></textarea>
+                <div class="text-danger small"><span asp-validation-for="Description"></span></div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Create Ticket</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

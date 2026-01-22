@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TicketingLite</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TicketingLite.styles.css" asp-append-version="true" />
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-semibold" asp-controller="Tickets" asp-action="Index">
+                TicketingLite
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Tickets" asp-action="Index">All Tickets</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Tickets" asp-action="My">My Tickets</a>
+                    </li>
+
+                    @if (User.IsInRole("Admin") || User.IsInRole("Agent"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Tickets" asp-action="MyWork">My Work</a>
+                        </li>
+                    }
+                </ul>
+
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container">
+    @if (TempData["Success"] is string s)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @s
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] is string e)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @e
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <main role="main" class="pb-4">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="border-top py-3">
+    <div class="container small text-muted d-flex justify-content-between">
+        <div>TicketingLite</div>
+        <div>Support Portal</div>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
